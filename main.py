@@ -7,8 +7,30 @@ from dash.dependencies import Input, Output
 import pandas as pd
 import plotly.express as pex
 
-pex.set_mapbox_access_token("pk.eyJ1IjoicGVucXV3aW4iLCJhIjoiY2poYW5jYmozMDQ1bDNkczd1bWZkNWRyNSJ9.qD2OoEO4YJaQbcuEq4iL2g")
+pex.set_mapbox_access_token(open(".mapbox_token").read())
 df = pd.read_csv('data.csv')
+df = df.replace({'material':'aluminum'},'aluminium')
+df = df.replace({'brand': [
+    'plastic',
+    'big plastic',
+    'can',
+    'cap',
+    'candywrapper',
+    'metal',
+    'beer',
+    'cup',
+    'paper',
+    'papercup',
+    'aluminium',
+    'aluminum',
+    'plasticbottle',
+    'bag',
+    'foil',
+    'packaging',
+    'wrapper',
+    'bottlecap',
+    'chemicals']}, 'unknown' )
+df = df.sort_values(by=['brand','material'])
 
 app = dash.Dash()
 
@@ -18,7 +40,14 @@ app.layout = html.Div(children=[
         id='dropdown',
         options=[{'label': i, 'value': i} for i in df['brand'].unique()],
         value='Breda'),
-    dcc.Graph(id='location-graph')
+    dcc.Loading(
+        dcc.Graph(
+            id='location-graph',
+            style={"height": 800}
+        ),
+        className="svg-container",
+        style={"height": 250},
+    )
 ])
 
 
@@ -35,11 +64,11 @@ def update_graph(selected):
         lon='lon',
         color = 'material',
         hover_name='material',
-        zoom=1,
+        zoom = 12,
+        center = {"lon": df['lon'][0], "lat": df['lat'][0]},
         title = f'Trash Location of {selected}'
     )
     fig.update_layout(mapbox_style="open-street-map")
-    #fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
     return fig
 
 
