@@ -55,7 +55,7 @@ app.layout = html.Div(children=[
         id='dropdown',
         multi=False,
         options=[{'label': i, 'value': i} for i in df['brand'].unique()],
-        value=None),
+        value='7up'),
     dcc.Loading(
         dcc.Graph(
             id='location-graph',
